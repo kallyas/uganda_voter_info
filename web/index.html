@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Check your polling station in Uganda">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Uganda Voter Info">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>Uganda Voter Info</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!-- This script adds the flutter initialization JS code -->
+  <script src="flutter.js" defer></script>
+  
+  <!-- Splash screen styles -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    .loading {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+      background-color: #1A237E;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 999;
+      transition: opacity 0.4s ease-out;
+    }
+    
+    .app-logo {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      margin-bottom: 24px;
+    }
+    
+    .loading-text {
+      color: white;
+      font-family: 'Roboto', sans-serif;
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 4px solid white;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading indicator -->
+  <div id="loading" class="loading">
+    <img class="app-logo" src="assets/splash_icon.png" alt="App Logo">
+    <div class="loading-text">Uganda Voter Info</div>
+    <div class="loading-spinner"></div>
+  </div>
+  
+  <script>
+    window.addEventListener('load', function() {
+      // Hide loading indicator after the Flutter app loads
+      window.addEventListener('flutter-first-frame', function() {
+        var loadingIndicator = document.getElementById('loading');
+        if (loadingIndicator) {
+          loadingIndicator.style.opacity = '0';
+          setTimeout(function() {
+            loadingIndicator.style.display = 'none';
+          }, 400);
+        }
+      });
+      
+      // Modern Flutter web initialization
+      _flutter = {};
+      _flutter.loader = flutter.loader;
+      
+      // Initialize the Flutter app
+      _flutter.loader.load({
+        serviceWorker: {
+          serviceWorkerVersion: "{{flutter_service_worker_version}}",
+        }
+      }).then(function(engineInitializer) {
+        return engineInitializer.initializeEngine();
+      }).then(function(appRunner) {
+        return appRunner.runApp();
+      });
+    });
+  </script>
+</body>
+</html>
