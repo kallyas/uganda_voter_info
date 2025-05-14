@@ -18,7 +18,7 @@ class CustomTextField extends StatelessWidget {
   final FocusNode? focusNode;
 
   const CustomTextField({
-    Key? key,
+    super.key,
     required this.controller,
     this.hintText,
     this.labelText,
@@ -32,7 +32,7 @@ class CustomTextField extends StatelessWidget {
     this.onChanged,
     this.onFieldSubmitted,
     this.focusNode,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
