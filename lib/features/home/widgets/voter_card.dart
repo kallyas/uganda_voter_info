@@ -7,9 +7,9 @@ class VoterCard extends StatelessWidget {
   final VoterModel voter;
 
   const VoterCard({
-    Key? key,
+    super.key,
     required this.voter,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
