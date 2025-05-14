@@ -1,7 +1,7 @@
-// lib/features/history/screens/history_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../widgets/animated_list_item.dart';
 import '../../home/providers/voter_provider.dart';
 import '../widgets/history_item.dart';
 
@@ -12,7 +12,7 @@ class HistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Correctly access the StorageService from the VoterProvider instead
     final voterProvider = Provider.of<VoterProvider>(context, listen: false);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search History'),
@@ -29,7 +29,7 @@ class HistoryScreen extends StatelessWidget {
         builder: (context, provider, child) {
           // Get the history directly from the provider's storageService
           final history = provider.getSearchHistory();
-          
+
           if (history.isEmpty) {
             return const Center(
               child: Column(
@@ -56,21 +56,24 @@ class HistoryScreen extends StatelessWidget {
               ),
             );
           }
-          
+
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: history.length,
             itemBuilder: (context, index) {
               final voter = history[index];
-              return HistoryItem(
-                voter: voter,
-                onTap: () {
-                  // Update the selected voter in the provider
-                  provider.setSelectedVoter(voter);
-                  
-                  // Go back to home screen
-                  Navigator.of(context).pop();
-                },
+              return AnimatedListItem(
+                index: index,
+                child: HistoryItem(
+                  voter: voter,
+                  onTap: () {
+                    // Update the selected voter in the provider
+                    provider.setSelectedVoter(voter);
+
+                    // Go back to home screen
+                    Navigator.of(context).pop();
+                  },
+                ),
               );
             },
           );
@@ -82,32 +85,33 @@ class HistoryScreen extends StatelessWidget {
   void _showClearHistoryDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Clear History'),
-        content: const Text(
-          'Are you sure you want to clear your search history? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('CANCEL'),
-          ),
-          TextButton(
-            onPressed: () {
-              final voterProvider = Provider.of<VoterProvider>(
-                context,
-                listen: false,
-              );
-              voterProvider.clearSearchHistory();
-              Navigator.of(context).pop();
-            },
-            child: const Text(
-              'CLEAR',
-              style: TextStyle(color: AppTheme.errorColor),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Clear History'),
+            content: const Text(
+              'Are you sure you want to clear your search history? This action cannot be undone.',
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('CANCEL'),
+              ),
+              TextButton(
+                onPressed: () {
+                  final voterProvider = Provider.of<VoterProvider>(
+                    context,
+                    listen: false,
+                  );
+                  voterProvider.clearSearchHistory();
+                  Navigator.of(context).pop();
+                },
+                child: const Text(
+                  'CLEAR',
+                  style: TextStyle(color: AppTheme.errorColor),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }
