@@ -10,17 +10,27 @@ class StorageService {
 
   Future<bool> saveToHistory(VoterModel voter) async {
     try {
-      final List<String> history = _prefs.getStringList(AppConstants.searchHistoryKey) ?? [];
-      
-      // Convert the voter model to JSON string
-      final String voterJson = jsonEncode(voter.toJson());
-      
-      // Add to history if it doesn't exist already
-      if (!history.contains(voterJson)) {
-        history.add(voterJson);
-        await _prefs.setStringList(AppConstants.searchHistoryKey, history);
+      final List<String> history =
+          _prefs.getStringList(AppConstants.searchHistoryKey) ?? [];
+
+      // Check if voter ID already exists in history
+      final List<VoterModel> existingVoters =
+          history.map((String voterJson) {
+            return VoterModel.fromJson(jsonDecode(voterJson));
+          }).toList();
+
+      // Check if this voter ID already exists
+      if (existingVoters.any(
+        (v) => v.voterIdentificationNumber == voter.voterIdentificationNumber,
+      )) {
+        return true; // Already exists, don't add duplicate
       }
-      
+
+      // Convert the voter model to JSON string and add to history
+      final String voterJson = jsonEncode(voter.toJson());
+      history.add(voterJson);
+      await _prefs.setStringList(AppConstants.searchHistoryKey, history);
+
       return true;
     } catch (e) {
       return false;
@@ -29,14 +39,16 @@ class StorageService {
 
   List<VoterModel> getSearchHistory() {
     try {
-      final List<String> history = _prefs.getStringList(AppConstants.searchHistoryKey) ?? [];
-      
+      final List<String> history =
+          _prefs.getStringList(AppConstants.searchHistoryKey) ?? [];
+
       return history.map((String voterJson) {
-        final Map<String, dynamic> voterMap = jsonDecode(voterJson);
-        return VoterModel.fromJson(voterMap);
-      }).toList()
-        ..sort((a, b) => b.searchedAt.compareTo(a.searchedAt)); // Sort by most recent first
-      
+          final Map<String, dynamic> voterMap = jsonDecode(voterJson);
+          return VoterModel.fromJson(voterMap);
+        }).toList()
+        ..sort(
+          (a, b) => b.searchedAt.compareTo(a.searchedAt),
+        ); // Sort by most recent first
     } catch (e) {
       return [];
     }
