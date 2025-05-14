@@ -1,6 +1,7 @@
-// lib/features/home/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/providers/theme_provider.dart';
+import '../../about/screens/about_screen.dart';
 import '../widgets/search_form.dart';
 import '../widgets/voter_card.dart';
 import '../providers/voter_provider.dart';
@@ -20,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final voterProvider = Provider.of<VoterProvider>(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Uganda Voter Info'),
@@ -40,19 +41,18 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.brightness_6),
             onPressed: () {
-              // Just a placeholder - in a real app, this would toggle theme mode
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Theme switching would be implemented here',
-                    style: TextStyle(color: colorScheme.onSurface),
-                  ),
-                  backgroundColor: colorScheme.surface,
-                  duration: const Duration(seconds: 2),
-                ),
-              );
+              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
             },
             tooltip: 'Toggle Theme',
+          ),
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const AboutScreen()),
+              );
+            },
+            tooltip: 'About',
           ),
         ],
       ),
@@ -62,9 +62,9 @@ class _HomeScreenState extends State<HomeScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              colorScheme.background,
-              colorScheme.background,
-              colorScheme.background.withOpacity(0.8),
+              colorScheme.surface,
+              colorScheme.surface,
+              colorScheme.surface.withOpacity(0.8),
             ],
           ),
         ),
@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         'Find Your Polling Station',
                         style: theme.textTheme.headlineMedium?.copyWith(
-                          color: colorScheme.onBackground,
+                          color: colorScheme.onSurface,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -96,13 +96,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         'Enter your voter identification number to find your polling station',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onBackground.withOpacity(0.7),
+                          color: colorScheme.onSurface.withOpacity(0.7),
                         ),
                       ),
                     ],
                   ),
                 ),
-                
+
                 // Search Form
                 Card(
                   elevation: 3,
@@ -119,9 +119,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Results area
                 Expanded(
                   child: _buildResultsArea(voterProvider, colorScheme, theme),
@@ -133,27 +133,24 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-  
+
   Widget _buildResultsArea(
-    VoterProvider voterProvider, 
+    VoterProvider voterProvider,
     ColorScheme colorScheme,
     ThemeData theme,
   ) {
     if (voterProvider.isLoading) {
-      return const Center(
-        child: LoadingIndicator(
-          message: 'Searching...',
-        ),
-      );
+      return const Center(child: LoadingIndicator(message: 'Searching...'));
     }
-    
+
     if (voterProvider.errorMessage != null) {
       return Center(
         child: Card(
           elevation: 2,
-          color: theme.brightness == Brightness.dark 
-              ? colorScheme.errorContainer 
-              : colorScheme.error.withOpacity(0.1),
+          color:
+              theme.brightness == Brightness.dark
+                  ? colorScheme.errorContainer
+                  : colorScheme.error.withOpacity(0.1),
           margin: const EdgeInsets.symmetric(horizontal: 24),
           child: Padding(
             padding: const EdgeInsets.all(24.0),
@@ -161,18 +158,15 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  color: colorScheme.error,
-                  size: 64,
-                ),
+                Icon(Icons.error_outline, color: colorScheme.error, size: 64),
                 const SizedBox(height: 16),
                 Text(
                   voterProvider.errorMessage!,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.brightness == Brightness.dark
-                        ? colorScheme.onErrorContainer
-                        : colorScheme.error,
+                    color:
+                        theme.brightness == Brightness.dark
+                            ? colorScheme.onErrorContainer
+                            : colorScheme.error,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -195,13 +189,27 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     }
-    
+
     if (voterProvider.voter != null) {
       return SingleChildScrollView(
-        child: VoterCard(voter: voterProvider.voter!),
+        child: TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0.0, end: 1.0),
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutQuart,
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, 20 * (1 - value)),
+                child: child,
+              ),
+            );
+          },
+          child: VoterCard(voter: voterProvider.voter!),
+        ),
       );
     }
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -215,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             'Search for a voter to see their polling station',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: colorScheme.onBackground.withOpacity(0.7),
+              color: colorScheme.onSurface.withOpacity(0.7),
             ),
             textAlign: TextAlign.center,
           ),
@@ -223,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             'Enter your voter ID in the search field above',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onBackground.withOpacity(0.5),
+              color: colorScheme.onSurface.withOpacity(0.5),
             ),
             textAlign: TextAlign.center,
           ),
